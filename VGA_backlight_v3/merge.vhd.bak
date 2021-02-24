@@ -1,0 +1,2 @@
+--module for registering input_value1, input_value2, input_value3 when 
+--both enable signals are high

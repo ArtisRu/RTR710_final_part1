@@ -1,0 +1,97 @@
+-- module for controlling DE0-NANO-SOC DE1-SOC ADC LTC2308
+
+-- Dependencies (Libraries and packages)
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+entity vga_sync_pulse_counter is 
+	port (
+		v_sync	: in std_logic;
+		h_sync	: in std_logic;
+		VGA_clk	: in std_logic;
+		send		: in std_logic;
+		v	: out integer range 0 to 799 := 0;--std_logic_vector(7 downto 0)
+		h	: out integer range 0 to 799 := 0
+	);
+end entity;
+
+architecture behavioral of vga_sync_pulse_counter is
+	signal h_count	: integer range 0 to 799 := 0;		-- VGA resolution
+	signal v_count	: integer range 0 to 599 := 0;
+	signal h_porch_counter : integer range 0 to 88 := 0;
+	signal v_porch_counter : integer range 0 to 26 := 0;
+	signal h_porch_counter_en : std_logic := '0';
+	signal v_porch_counter_en : std_logic := '0';
+	signal global_start	: std_logic := '0';
+	signal global_start_v_porch_counter : integer range 0 to 25 := 0;
+	
+	type t_State is (H_start, H_porch);
+	signal State : t_State;
+	
+begin
+	process(VGA_clk) is
+	begin
+		-- test connections
+		v <= v_count;
+		h <= h_count;
+	
+		--wait for first vertical sync pulse + vertical front porch so we can start at first horizontal pixel
+		if v_sync = '0' and global_start <= '0' then
+			if rising_edge(VGA_clk) then 
+				global_start_v_porch_counter <= global_start_v_porch_counter + 1;
+			end if;
+			if global_start_v_porch_counter = 25 then		-- v_sync_pulse + front porch [pixels]
+				global_start <= '1';
+			end if;
+		end if;
+	
+		--counters
+		if global_start <= '1' and rising_edge(VGA_clk) and h_porch_counter_en = '1' then
+			h_porch_counter <= h_porch_counter + 1;
+		end if;
+		
+		if global_start <= '1' and rising_edge(VGA_clk) and v_porch_counter_en = '1' then
+			v_porch_counter <= v_porch_counter + 1;
+		end if;
+		
+		-- FSM
+		if global_start <= '1' and rising_edge(VGA_clk) then
+			h_count <= h_count + 1;
+			if h_count = 799 then			-- resolution
+				h_count <= 0;
+			end if;
+			
+			case State is
+				when H_start =>
+					h_porch_counter <= 0;
+					v_porch_counter <= 0;
+					v_porch_counter_en <= '0';
+					if h_sync = '0' then
+						v_count <= v_count + 1;
+						State <= H_porch;
+--					elsif v_sync = '0' then
+--						State <= Frame_end;
+					end if; 
+		
+				when H_porch =>
+					h_count <= 799;					-- resolution
+					h_porch_counter_en <= '1';
+					if h_porch_counter = 87 then  -- 88 = back_porch [pixels]
+						State <= H_start;
+--					elsif v_sync = '0' then
+--						State <= Frame_end;
+					end if;
+					
+--				when Frame_end =>
+--					v_porch_counter_en <= '1';
+--					h_count <= 799;
+--					v_count <= 599;					-- resolution
+--				if v_porch_counter = 23 then
+--					State <= H_start;
+--				end if;
+				
+			end case;	
+		end if;
+	end process;
+end architecture;

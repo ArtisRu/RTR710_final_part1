@@ -1,0 +1,6 @@
+
+State Machine - |main|vga_sync_pulse_counter:inst2|State
+Name State.H_start State.H_porch State.Frame_end 
+State.Frame_end 0 0 0 
+State.H_porch 0 1 1 
+State.H_start 1 0 1 
