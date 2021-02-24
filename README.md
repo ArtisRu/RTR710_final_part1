@@ -16,4 +16,4 @@ Goal of this module is to output current location of VGA pixel. Horizontal count
 Module that merges together 1) and 2). Converts 800x600 horizontal and vertical coordinates to 25x20 (new_x x new_y) and calculates new memory address 25 * new_x + new_y. Converts ADC (11 downto 0) output to (9 downto 2) and writes result into 32bit word - xxxxxxxxRRRRRRRRGGGGGGGGBBBBBBBB (stuff zeros and shift left according to byte enable value). Information about each color is collected for 3 horizontal lines at a time, for example lines 0,1 and 2 output new coordinates plus corresponding 8 bits of RED information, lines 3,4 and 5 - new coordinates plus corresponding 8 bits of GREEN information. Module also outputs byte enable signal ("0100" for R, "0010" for G, "0001" for B), address, 32bit word for color and enable signal when 1) and 2) both are valid.
 
 ![](done.png)
-![](rtl.png)
+![](RTL.png)
