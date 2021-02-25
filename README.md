@@ -1,5 +1,5 @@
 # RTR710_final_part1
- Samples analog VGA signal, counts horizontal and vertical sync pulses. Input 800x600, output 25x20 pixels. Input clk is 40 MHz for each entity.
+ Samples analog VGA signal, counts horizontal and vertical sync pulses. Input 800x600, output 25x20 pixels. Input clk is 40 MHz for each entity. We used HDMI to VGA adapter which tricks pc motherboard into sending video data.
  
  Part1 of final project consists of 3 parts:
  
